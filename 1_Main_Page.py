@@ -9,10 +9,10 @@ import requests
 import json
 
 # Load the primary dataset
-data = pd.read_csv('C:\\Users\\atnin\\Downloads\\synthetic_water_usage.csv')
+data = pd.read_csv('C:\\Users\\atnin\Downloads\\synthetic_water_usagee.csv')
 
 # Load the secondary (lower values) dataset
-lower_data = pd.read_csv('C:\\Users\\atnin\\Downloads\\synthetic_water_usage_lower (2).csv')
+lower_data = pd.read_csv('C:\\Users\\atnin\Downloads\\synthetic_water_usage_lower.csv')
 
 # Set up OpenAI API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
@@ -62,6 +62,7 @@ if st.button("Generate Report"):
     st.table(avg_usage_df)
 
     # Calculate Financial Estimates
+    st.subheader("Estimated Water Costs")
     cost_per_gallon = 0.004  # Cost per gallon in USD
     total_usage = avg_usage_df["Average Daily Gallons"].sum()
     estimated_cost_daily = total_usage * cost_per_gallon
@@ -84,14 +85,14 @@ if st.button("Generate Report"):
 
     trend_data_combined = pd.DataFrame({
         'Original Usage (gallons)': data['Total Usage (gallons)'],
-        'Reduced Usage (gallons)': lower_data['Total Usage (gallons)']
+        'Average Usage (gallons)': lower_data['Total Usage (gallons)']
     })
 
     # Display the combined line chart
     st.line_chart(trend_data_combined)
 
     # Store variables for use in the Insights page
-    st.session_state["user_data"] = data
+    st.session_state["data"] = data
     st.session_state["household_size"] = household_size
     st.session_state["state"] = state
     st.session_state["total_usage"] = total_usage
