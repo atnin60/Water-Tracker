@@ -9,10 +9,10 @@ import requests
 import json
 
 # Load the primary dataset
-data = pd.read_csv('C:\\Users\\atnin\Downloads\\synthetic_water_usagee.csv')
+data = pd.read_csv('Pages/DAta/Synthetic Water Usage.csv')
 
 # Load the secondary (lower values) dataset
-lower_data = pd.read_csv('C:\\Users\\atnin\Downloads\\synthetic_water_usage_lower.csv')
+lower_data = pd.read_csv('Pages/DAta/Lower Synthetic Water Usage.csv')
 
 # Set up OpenAI API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
@@ -84,8 +84,8 @@ if st.button("Generate Report"):
     lower_data.set_index('Date', inplace=True)
 
     trend_data_combined = pd.DataFrame({
-        'Original Usage (gallons)': data['Total Usage (gallons)'],
-        'Average Usage (gallons)': lower_data['Total Usage (gallons)']
+        'Users Usage (gallons)': data['Total Usage (gallons)'],
+        'Average Statewide Usage (gallons)': lower_data['Total Usage (gallons)']
     })
 
     # Display the combined line chart
@@ -99,7 +99,7 @@ if st.button("Generate Report"):
     st.session_state["savings_goal"] = savings_goal
     st.session_state["advice_style"] = advice_style
 else:
-    st.warning("Please fill out all fields and upload a dataset to generate the report.")
+    st.warning("Please fill out all fields to generate the report.")
 
 
 
