@@ -16,11 +16,48 @@ def get_completion(prompt, model="gpt-3.5-turbo"):
     )
     return response.choices[0].message['content'].strip()
 
+# Water-themed UI styling
+st.markdown("""
+    <style>
+        .main-title {
+            font-size: 2em;
+            color: #1E88E5;
+            font-weight: bold;
+            text-align: center;
+            padding: 0.5em;
+        }
+        .section-title {
+            color: #0277BD;
+            font-weight: bold;
+            font-size: 1.5em;
+            padding-top: 1em;
+        }
+        .sidebar .sidebar-content {
+            background-color: #E3F2FD;
+            padding: 1em;
+        }
+        .stButton>button {
+            background-color: #29B6F6;
+            color: #FFFFFF;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 0.5em 1em;
+        }
+        .stButton>button:hover {
+            background-color: #0288D1;
+            color: #E3F2FD;
+        }
+        .stAlert {
+            background-color: #81D4FA;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Display Insights and Suggestions only if data is available
 if "data" in st.session_state:
-    st.markdown("# Additional Insights and AI Suggestions 💧")
+    st.markdown('<h1 class="main-title">💧 Additional Insights and AI Suggestions</h1>', unsafe_allow_html=True)
     st.sidebar.markdown("# Insights & Suggestions 🌟")
-    
+
     data = st.session_state["data"]
     household_size = st.session_state["household_size"]
     state = st.session_state["state"]
@@ -28,26 +65,24 @@ if "data" in st.session_state:
     savings_goal = st.session_state["savings_goal"]
     advice_style = st.session_state["advice_style"]
 
-    # Additional Insights
-    st.subheader("Additional Insights")
+    # Additional Insights Section
+    st.markdown('<div class="section-title">Additional Insights</div>', unsafe_allow_html=True)
     numeric_columns = data.select_dtypes(include=[float, int]).columns
     max_usage_day = data[numeric_columns].sum(axis=1).idxmax()
     min_usage_day = data[numeric_columns].sum(axis=1).idxmin()
 
-    # Extract the row corresponding to the peak usage day
+    # Display peak and lowest usage day
     peak_usage_data = data.loc[max_usage_day]
-
-    # Display the peak day with activities separated
     st.write(f"**Peak Water Usage Day**: {max_usage_day.strftime('%Y-%m-%d')}")
     st.write("**Detailed Water Usage**:")
     for activity, usage in peak_usage_data.items():
         st.write(f"- {activity}: {usage:.2f} gallons")
 
-    # Total usage for clarity
     total_usage = peak_usage_data[numeric_columns].sum()
     st.write(f"**Total Usage**: {total_usage:.2f} gallons")
 
     # Comparison with Household Averages
+    st.markdown('<div class="section-title">Household Usage Comparison</div>', unsafe_allow_html=True)
     avg_usage_by_household_size = {
         1: 50, 2: 90, 3: 120, 4: 150, 5: 180
     }
@@ -59,7 +94,7 @@ if "data" in st.session_state:
         st.write("Your water usage is **below average** compared to similar households. Keep up the good work!")
 
     # Generative AI Suggestions for Water Savings
-    st.subheader("Personalized AI-Generated Water-Saving Suggestions")
+    st.markdown('<div class="section-title">Personalized AI-Generated Water-Saving Suggestions</div>', unsafe_allow_html=True)
     prompt = (
         f"I have a household with {household_size} people located in {state}. "
         f"Our daily water usage is around {total_usage:.2f} gallons. "

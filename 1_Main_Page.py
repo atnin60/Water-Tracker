@@ -5,17 +5,13 @@ import numpy as np
 import datetime
 import openai
 import os
-import requests
-import json
 
-# Load the primary dataset
+# Load datasets
 data = pd.read_csv('Pages/DAta/Synthetic Water Usage.csv')
-
-# Load the secondary (lower values) dataset
 lower_data = pd.read_csv('Pages/DAta/Lower Synthetic Water Usage.csv')
 
 # Set up OpenAI API key
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_completion(prompt, model="gpt-3.5-turbo"):
     response = openai.ChatCompletion.create(
@@ -29,20 +25,56 @@ def get_completion(prompt, model="gpt-3.5-turbo"):
     )
     return response.choices[0].message['content'].strip()
 
-# Main page setup
-st.markdown("# Water Usage Tracker 💧")
-st.sidebar.markdown("# Main page 🎈")
+# Main page setup with water-themed styling
+st.markdown("""
+    <style>
+        .main-title {
+            font-size: 2em;
+            color: #1E88E5;
+            font-weight: bold;
+            text-align: center;
+            padding: 0.5em;
+        }
+        .section-title {
+            color: #0277BD;
+            font-weight: bold;
+            font-size: 1.5em;
+            padding-top: 1em;
+        }
+        .sidebar .sidebar-content {
+            background-color: #E3F2FD;
+            padding: 1em;
+        }
+        .stButton>button {
+            background-color: #29B6F6;
+            color: #FFFFFF;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 0.5em 1em;
+        }
+        .stButton>button:hover {
+            background-color: #0288D1;
+            color: #E3F2FD;
+        }
+        .stAlert {
+            background-color: #81D4FA;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown('<h1 class="main-title">💧 Water Usage Tracker</h1>', unsafe_allow_html=True)
+st.sidebar.markdown("# Main Page 🎈")
 
 # Intro message
-st.write("This page provides a water tracking template to help you understand and manage your household water usage. Input your household details and goals to get started!")
+st.write("This application helps you track and optimize your household water usage with personalized insights. 🌊")
 
 # User Input Section
-st.subheader("Enter Household Details")
+st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
 household_size = st.number_input("Number of people in household", min_value=1, step=1)
 state = st.selectbox("State", ["CA", "NY", "TX", "FL", "Other"])
 
 # Prompt Tone Selection
-st.subheader("Choose Advice Style")
+st.markdown('<div class="section-title">Choose Advice Style</div>', unsafe_allow_html=True)
 advice_style = st.radio("Select the style of advice you would like to receive:", ("Concise tips", "Detailed advice", "Friendly reminders"))
 
 # Input Desired Savings Goal
@@ -50,7 +82,7 @@ savings_goal = st.number_input("Enter your target savings on the water bill (USD
 
 # Process Data and Display Report
 if st.button("Generate Report"):
-    st.subheader("Daily Water Usage Report")
+    st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
     
     # Ensure only numeric columns are used for averaging
     numeric_columns = data.select_dtypes(include=[np.number]).columns
@@ -62,7 +94,7 @@ if st.button("Generate Report"):
     st.table(avg_usage_df)
 
     # Calculate Financial Estimates
-    st.subheader("Estimated Water Costs")
+    st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
     cost_per_gallon = 0.004  # Cost per gallon in USD
     total_usage = avg_usage_df["Average Daily Gallons"].sum()
     estimated_cost_daily = total_usage * cost_per_gallon
@@ -74,7 +106,7 @@ if st.button("Generate Report"):
     st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly:.2f}")
 
     # Water Usage Trend Forecast with both datasets
-    st.subheader("Water Usage Trend Over Time")
+    st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
 
     # Prepare data from both datasets for plotting
     data['Date'] = pd.to_datetime(data['Date'])
@@ -84,12 +116,12 @@ if st.button("Generate Report"):
     lower_data.set_index('Date', inplace=True)
 
     trend_data_combined = pd.DataFrame({
-        'Users Usage (gallons)': data['Total Usage (gallons)'],
-        'Average Statewide Usage (gallons)': lower_data['Total Usage (gallons)']
+        'Your Usage (gallons)': data['Total Usage (gallons)'],
+        'State Average (gallons)': lower_data['Total Usage (gallons)']
     })
 
-    # Display the combined line chart
-    st.line_chart(trend_data_combined)
+    # Display the combined line chart with themed colors
+    st.line_chart(trend_data_combined, height=300, use_container_width=True)
 
     # Store variables for use in the Insights page
     st.session_state["data"] = data
@@ -100,6 +132,3 @@ if st.button("Generate Report"):
     st.session_state["advice_style"] = advice_style
 else:
     st.warning("Please fill out all fields to generate the report.")
-
-
-
