@@ -71,7 +71,12 @@ st.write("This application helps you track and optimize your household water usa
 # User Input Section
 st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
 household_size = st.number_input("Number of people in household", min_value=1, step=1)
-state = st.selectbox("State", ["CA", "NY", "TX", "FL", "Other"])
+state = st.selectbox("City", [
+    "Gilroy", "San Martin", "Morgan Hill", "Los Gatos", "Monte Sereno", 
+    "Campbell", "Saratoga", "San Jose", "Milpitas", "Santa Clara", 
+    "Sunnyvale", "Cupertino", "Los Altos", "Mountain View", "Palo Alto", 
+    "L.A. Hills"
+])
 
 # Prompt Tone Selection
 st.markdown('<div class="section-title">Choose Advice Style</div>', unsafe_allow_html=True)
