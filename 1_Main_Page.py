@@ -5,10 +5,21 @@ import numpy as np
 import datetime
 import openai
 import os
+import matplotlib.pyplot as plt
 
 # Load datasets
 data = pd.read_csv('Pages/DAta/Synthetic Water Usage.csv')
-lower_data = pd.read_csv('Pages/DAta/Lower Synthetic Water Usage.csv')
+city_files = {
+    "L.A. Hills": "Pages/DAta/L.A._Hills_Water_Usage.csv",
+    "Palo Alto": "Pages/DAta/Palo_Alto_Water_Usage.csv",
+    "Mountain View": "Pages/DAta/Mountain_View_Water_Usage.csv",
+    "Los Altos": "Pages/DAta/Los_Altos_Water_Usage.csv",
+    "Santa Clara": "Pages/DAta/Santa_Clara_Water_Usage.csv",
+    "San Jose": "Pages/DAta/San_Jose_Water_Usage.csv",
+    "Monte Sereno": "Pages/DAta/Monte_Sereno_Water_Usage.csv",
+    "Los Gatos": "Pages/DAta/Los_Gatos_Water_Usage.csv",
+    "Morgan Hill": "Pages/DAta/Morgan_Hill_Water_Usage.csv",
+}
 
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -71,12 +82,7 @@ st.write("This application helps you track and optimize your household water usa
 # User Input Section
 st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
 household_size = st.number_input("Number of people in household", min_value=1, step=1)
-state = st.selectbox("City", [
-    "Gilroy", "San Martin", "Morgan Hill", "Los Gatos", "Monte Sereno", 
-    "Campbell", "Saratoga", "San Jose", "Milpitas", "Santa Clara", 
-    "Sunnyvale", "Cupertino", "Los Altos", "Mountain View", "Palo Alto", 
-    "L.A. Hills"
-])
+city = st.selectbox("Choose a city:", list(city_files.keys()))
 
 # Prompt Tone Selection
 st.markdown('<div class="section-title">Choose Advice Style</div>', unsafe_allow_html=True)
@@ -88,19 +94,38 @@ savings_goal = st.number_input("Enter your target savings on the water bill (USD
 # Process Data and Display Report
 if st.button("Generate Report"):
     st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
+
+    # Fetch the file path for the selected city
+    data_path = city_files[city]
+
+    # Load the corresponding CSV data
+    lower_data = pd.read_csv(data_path)
     
     # Ensure only numeric columns are used for averaging
     numeric_columns = data.select_dtypes(include=[np.number]).columns
     avg_usage = data[numeric_columns].mean().to_dict()
     
-    # Display the average daily water usage for each activity
+    # Remove 'Total Usage (gallons)' from the bar graph
+    avg_usage.pop("Total Usage (gallons)", None)
+    
+    # Display the average daily water usage for each activity as a table
     avg_usage_df = pd.DataFrame(list(avg_usage.items()), columns=["Activity", "Average Daily Gallons"])
     st.write("Here is your average daily water usage for each activity:")
     st.table(avg_usage_df)
 
+    # Create and display the bar graph for daily water usage
+    st.markdown('<div class="section-title">Visualizing Your Daily Water Usage</div>', unsafe_allow_html=True)
+    fig, ax = plt.subplots()
+    ax.bar(avg_usage_df["Activity"], avg_usage_df["Average Daily Gallons"], color='#29B6F6')
+    ax.set_title("Average Daily Water Usage by Activity", fontsize=16, color='#0277BD')
+    ax.set_ylabel("Gallons", fontsize=14, color='#0277BD')
+    ax.set_xlabel("Activity", fontsize=14, color='#0277BD')
+    ax.tick_params(axis='x', rotation=45)
+    st.pyplot(fig)
+
     # Calculate Financial Estimates
     st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
-    cost_per_gallon = 0.004  # Cost per gallon in USD
+    cost_per_gallon = 0.1  # Cost per gallon in USD
     total_usage = avg_usage_df["Average Daily Gallons"].sum()
     estimated_cost_daily = total_usage * cost_per_gallon
     estimated_cost_monthly = estimated_cost_daily * 30
@@ -131,7 +156,7 @@ if st.button("Generate Report"):
     # Store variables for use in the Insights page
     st.session_state["data"] = data
     st.session_state["household_size"] = household_size
-    st.session_state["state"] = state
+    st.session_state["city"] = city
     st.session_state["total_usage"] = total_usage
     st.session_state["savings_goal"] = savings_goal
     st.session_state["advice_style"] = advice_style
