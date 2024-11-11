@@ -131,9 +131,20 @@ if st.button("Generate Report"):
     estimated_cost_monthly = estimated_cost_daily * 30
     estimated_cost_yearly = estimated_cost_daily * 365
 
+    total_usage_city = lower_data["Total Usage (gallons)"].sum()
+    estimated_cost_daily_city = total_usage_city * cost_per_gallon
+    estimated_cost_monthly_city = estimated_cost_daily_city * 30
+    estimated_cost_yearly_city = estimated_cost_daily_city * 365
+
+    st.write("**Preset Database (State Average) Costs**")
     st.write(f"**Estimated Daily Cost**: ${estimated_cost_daily:.2f}")
     st.write(f"**Estimated Monthly Cost**: ${estimated_cost_monthly:.2f}")
     st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly:.2f}")
+
+    st.write("**Selected City Costs**")
+    st.write(f"**Estimated Daily Cost**: ${estimated_cost_daily_city:.2f}")
+    st.write(f"**Estimated Monthly Cost**: ${estimated_cost_monthly_city:.2f}")
+    st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly_city:.2f}")
 
     # Water Usage Trend Forecast with both datasets
     st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
