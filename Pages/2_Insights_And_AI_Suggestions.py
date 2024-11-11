@@ -60,7 +60,7 @@ if "data" in st.session_state:
 
     data = st.session_state["data"]
     household_size = st.session_state["household_size"]
-    state = st.session_state["state"]
+    city = st.session_state["city"]
     total_usage = st.session_state["total_usage"]
     savings_goal = st.session_state["savings_goal"]
     advice_style = st.session_state["advice_style"]
@@ -96,7 +96,7 @@ if "data" in st.session_state:
     # Generative AI Suggestions for Water Savings
     st.markdown('<div class="section-title">Personalized AI-Generated Water-Saving Suggestions</div>', unsafe_allow_html=True)
     prompt = (
-        f"I have a household with {household_size} people located in {state}. "
+        f"I have a household with {household_size} people located in {city}. "
         f"Our daily water usage is around {total_usage:.2f} gallons. "
         f"We want to save ${savings_goal:.2f} on our water bill. "
         f"The user prefers '{advice_style}' advice. "
