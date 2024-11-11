@@ -115,13 +115,13 @@ if st.button("Generate Report"):
 
     # Create and display the bar graph for daily water usage
     st.markdown('<div class="section-title">Visualizing Your Daily Water Usage</div>', unsafe_allow_html=True)
-    fig, ax = plt.subplots()
-    ax.bar(avg_usage_df["Activity"], avg_usage_df["Average Daily Gallons"], color='#29B6F6')
-    ax.set_title("Average Daily Water Usage by Activity", fontsize=16, color='#0277BD')
-    ax.set_ylabel("Gallons", fontsize=14, color='#0277BD')
-    ax.set_xlabel("Activity", fontsize=14, color='#0277BD')
-    ax.tick_params(axis='x', rotation=45)
-    st.pyplot(fig)
+    fig_bar, ax_bar = plt.subplots()
+    ax_bar.bar(avg_usage_df["Activity"], avg_usage_df["Average Daily Gallons"], color='#29B6F6')
+    ax_bar.set_title("Average Daily Water Usage by Activity", fontsize=16, color='#0277BD')
+    ax_bar.set_ylabel("Gallons", fontsize=14, color='#0277BD')
+    ax_bar.set_xlabel("Activity", fontsize=14, color='#0277BD')
+    ax_bar.tick_params(axis='x', rotation=45)
+    st.pyplot(fig_bar)
 
     # Calculate Financial Estimates
     st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
@@ -147,11 +147,20 @@ if st.button("Generate Report"):
 
     trend_data_combined = pd.DataFrame({
         'Your Usage (gallons)': data['Total Usage (gallons)'],
-        'State Average (gallons)': lower_data['Total Usage (gallons)']
+        'City Average (gallons)': lower_data['Total Usage (gallons)']
     })
 
-    # Display the combined line chart with themed colors
-    st.line_chart(trend_data_combined, height=300, use_container_width=True)
+    # Create and display the trend line chart with custom Matplotlib
+    fig_trend, ax_trend = plt.subplots(figsize=(10, 6))
+    ax_trend.plot(trend_data_combined.index, trend_data_combined['Your Usage (gallons)'], label='Your Usage (gallons)', color='blue', linewidth=2)
+    ax_trend.plot(trend_data_combined.index, trend_data_combined['City Average (gallons)'], label='City Average (gallons)', color='orange', linewidth=2)
+    ax_trend.set_title("Water Usage Trend Over Time", fontsize=16, color='#0277BD')
+    ax_trend.set_xlabel("Date", fontsize=14, color='#0277BD')
+    ax_trend.set_ylabel("Gallons", fontsize=14, color='#0277BD')
+    ax_trend.legend(fontsize=12)
+    ax_trend.grid(True, linestyle='--', alpha=0.6)
+    plt.xticks(rotation=45)
+    st.pyplot(fig_trend)
 
     # Store variables for use in the Insights page
     st.session_state["data"] = data
