@@ -126,12 +126,12 @@ if st.button("Generate Report"):
     # Calculate Financial Estimates
     st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
     cost_per_gallon = 0.1  # Cost per gallon in USD
-    total_usage = avg_usage_df["Average Daily Gallons"].sum()
+    total_usage = data["Total Usage (gallons)"].mean()
     estimated_cost_daily = total_usage * cost_per_gallon
     estimated_cost_monthly = estimated_cost_daily * 30
     estimated_cost_yearly = estimated_cost_daily * 365
 
-    total_usage_city = lower_data["Total Usage (gallons)"].sum()
+    total_usage_city = lower_data["Total Usage (gallons)"].mean()
     estimated_cost_daily_city = total_usage_city * cost_per_gallon
     estimated_cost_monthly_city = estimated_cost_daily_city * 30
     estimated_cost_yearly_city = estimated_cost_daily_city * 365
