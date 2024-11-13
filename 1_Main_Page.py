@@ -113,15 +113,33 @@ if st.button("Generate Report"):
     st.write("Here is your average daily water usage for each activity:")
     st.table(avg_usage_df)
 
-    # Create and display the bar graph for daily water usage
-    st.markdown('<div class="section-title">Visualizing Your Daily Water Usage</div>', unsafe_allow_html=True)
-    fig_bar, ax_bar = plt.subplots()
-    ax_bar.bar(avg_usage_df["Activity"], avg_usage_df["Average Daily Gallons"], color='#29B6F6')
-    ax_bar.set_title("Average Daily Water Usage by Activity", fontsize=16, color='#0277BD')
-    ax_bar.set_ylabel("Gallons", fontsize=14, color='#0277BD')
-    ax_bar.set_xlabel("Activity", fontsize=14, color='#0277BD')
-    ax_bar.tick_params(axis='x', rotation=45)
-    st.pyplot(fig_bar)
+    # Calculate city average water usage for each activity
+    city_avg_usage = lower_data[numeric_columns].mean().to_dict()
+    city_avg_usage.pop("Total Usage (gallons)", None)
+
+    # Combine user and city data into a DataFrame
+    comparison_df = pd.DataFrame({
+        "Activity": avg_usage_df["Activity"],
+        "Your Usage (gallons)": avg_usage_df["Average Daily Gallons"],
+        "City Average (gallons)": [city_avg_usage.get(activity, 0) for activity in avg_usage_df["Activity"]]
+    })
+
+    # Create and display the bar graph for daily water usage comparison
+    st.markdown('<div class="section-title">Comparison of Your Usage vs. City Average</div>', unsafe_allow_html=True)
+    fig_comparison, ax_comparison = plt.subplots()
+    bar_width = 0.35
+    x = np.arange(len(comparison_df["Activity"]))
+
+    ax_comparison.bar(x - bar_width/2, comparison_df["Your Usage (gallons)"], bar_width, label='Your Usage', color='#29B6F6')
+    ax_comparison.bar(x + bar_width/2, comparison_df["City Average (gallons)"], bar_width, label='City Average', color='#FFA726')
+
+    ax_comparison.set_title("Comparison of Daily Water Usage by Activity", fontsize=16, color='#0277BD')
+    ax_comparison.set_ylabel("Gallons", fontsize=14, color='#0277BD')
+    ax_comparison.set_xlabel("Activity", fontsize=14, color='#0277BD')
+    ax_comparison.set_xticks(x)
+    ax_comparison.set_xticklabels(comparison_df["Activity"], rotation=45)
+    ax_comparison.legend(fontsize=12)
+    st.pyplot(fig_comparison)
 
     # Calculate Financial Estimates
     st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
@@ -136,7 +154,7 @@ if st.button("Generate Report"):
     estimated_cost_monthly_city = estimated_cost_daily_city * 30
     estimated_cost_yearly_city = estimated_cost_daily_city * 365
 
-    st.write("**Preset Database (State Average) Costs**")
+    st.write("**Your Costs**")
     st.write(f"**Estimated Daily Cost**: ${estimated_cost_daily:.2f}")
     st.write(f"**Estimated Monthly Cost**: ${estimated_cost_monthly:.2f}")
     st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly:.2f}")
@@ -160,6 +178,7 @@ if st.button("Generate Report"):
         'Your Usage (gallons)': data['Total Usage (gallons)'],
         'City Average (gallons)': lower_data['Total Usage (gallons)']
     })
+
 
     # Create and display the trend line chart with custom Matplotlib
     fig_trend, ax_trend = plt.subplots(figsize=(10, 6))
