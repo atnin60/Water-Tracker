@@ -11,7 +11,7 @@ def get_completion(prompt, model="gpt-3.5-turbo"):
             {"role": "system", "content": "You are a knowledgeable and resourceful water-saving advisor specializing in practical and sustainable solutions for individuals and families. Your role involves assessing water usage patterns, identifying areas for improvement, and providing tailored recommendations to help reduce water consumption. You have expertise in various water-saving technologies, landscaping techniques, and behavioral strategies. Additionally, you are skilled at educating clients about the  financial benefits of water conservation. Your goal is to empower clients with actionable advice that is both effective and easy to implement, ultimately promoting a more sustainable approach to water usage."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=450,
+        max_tokens=650,
         temperature=0.7
     )
     return response.choices[0].message['content'].strip()
@@ -84,7 +84,17 @@ if "data" in st.session_state:
         f"Our daily water usage is around {total_usage:.2f} gallons. "
         f"We want to save ${savings_goal:.2f} on our water bill. "
         f"The user prefers '{advice_style}' advice. "
-  "Based on the user's water usage statistics, please provide a detailed analysis of what causes the high household water consumption for the user. Following this analysis, provide recommendations on how to save water in each high usage problem area based on the average daily water usage by activity graph on the first page of the application. Consider factors such as family size, lifestyle habits, and common appliances in use. It is also important to take into account the user's data on water usage and prices and compare it to the selected city's average to determine which of the user's activities is above average and create the personalized recommendations to reduce water usage. Please include practical suggestions such as changes in daily routines that can be adopted to reduce water usage effectively."    )
+  "Based on the my water usage statistics, please provide a detailed analysis of what causes the high household water consumption for me. \
+        Also be sure to include my water usage amount, as well as the price. \
+        In this analysis, identify the high usage areas.\
+        For the analysis, use the following template for what to say:\
+            'Based on your current water usage of ___ gallons per day and you goal to save $___ on your water bill, here are some concise tips to help you achieve your water-saving and cost-saving goals:'\
+    Following this analysis, provide recommendations on how to save water in each high usage problem area based on the average daily water usage by activity graph on the first page of the application. \
+        Consider factors such as my family size, lifestyle habits, and common appliances in use. \
+    It is also important to take into account the my data on water usage and prices and compare it to the selected city's average to determine which of my activities is above average and create the personalized recommendations to reduce water usage.\
+    Please include practical suggestions such as changes in daily routines that can be adopted to reduce water usage effectively.\
+    You should have the following headers: Analysis of High Household Water Consumption, Identified High Usage Areas, Recommendations for Water Savings, and Additional Tips for Water Savings \
+        Be sure to increase the size of these headers and make them bold"    )
     suggestions = get_completion(prompt)
     st.write(suggestions)
 else:

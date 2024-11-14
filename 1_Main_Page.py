@@ -1,5 +1,6 @@
 # 1_Main_Page.py
 import streamlit as st
+import streamlit as st
 import pandas as pd
 import numpy as np
 import datetime
@@ -19,6 +20,14 @@ city_files = {
     "Monte Sereno": "Pages/DAta/Monte_Sereno_Water_Usage.csv",
     "Los Gatos": "Pages/DAta/Los_Gatos_Water_Usage.csv",
     "Morgan Hill": "Pages/DAta/Morgan_Hill_Water_Usage.csv",
+    "Campbell": "Pages\DAta\Campbell_Water_Usage1.csv",
+    "Cupertino": "Pages\DAta\Cupertino_Water_Usage1.csv",
+    "Gilroy": "Pages\DAta\Gilroy_Water_Usage1.csv",
+    "Milpitas": "Pages\DAta\Milpitas_Water_Usage1.csv",
+    "San Martin": "Pages\DAta\San_Martin_Water_Usage.csv",
+    "Saratoga": "Pages\DAta\Saratoga_Water_Usage1.csv",
+    "Sunnyvale": "Pages\DAta\Sunnyvale_Water_Usage1.csv"
+
 }
 
 # Set up OpenAI API key
@@ -154,15 +163,26 @@ if st.button("Generate Report"):
     estimated_cost_monthly_city = estimated_cost_daily_city * 30
     estimated_cost_yearly_city = estimated_cost_daily_city * 365
 
-    st.write("**Your Costs**")
-    st.write(f"**Estimated Daily Cost**: ${estimated_cost_daily:.2f}")
-    st.write(f"**Estimated Monthly Cost**: ${estimated_cost_monthly:.2f}")
-    st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly:.2f}")
+    # Prepare data for plotting
+    costs = {
+        "Estimated Daily Cost": [estimated_cost_daily, estimated_cost_daily_city],
+        "Estimated Monthly Cost": [estimated_cost_monthly, estimated_cost_monthly_city],
+        "Estimated Yearly Cost": [estimated_cost_yearly, estimated_cost_yearly_city]
+    }
+    labels = ["Your Average", city]
 
-    st.write("**Selected City Costs**")
-    st.write(f"**Estimated Daily Cost**: ${estimated_cost_daily_city:.2f}")
-    st.write(f"**Estimated Monthly Cost**: ${estimated_cost_monthly_city:.2f}")
-    st.write(f"**Estimated Yearly Cost**: ${estimated_cost_yearly_city:.2f}")
+    # Display each cost comparison as a separate horizontal bar chart
+    for cost_type, values in costs.items():
+        fig, ax = plt.subplots()
+        ax.barh(labels, values, color=["skyblue", "salmon"])
+        ax.set_title(cost_type)
+        ax.set_xlabel("Cost in USD")
+
+        # Add values to each bar
+        for index, value in enumerate(values):
+            ax.text(value, index, f"${value:.2f}", va='center', ha='right' if value > 0 else 'left')
+
+        st.pyplot(fig)
 
     # Water Usage Trend Forecast with both datasets
     st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
