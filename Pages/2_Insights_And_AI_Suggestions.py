@@ -62,16 +62,24 @@ if "data" in st.session_state:
     household_size = st.session_state["household_size"]
     city = st.session_state["city"]
     total_usage = st.session_state["total_usage"]
+    total_usage_city = st.session_state["total_usage_city"]
     savings_goal = st.session_state["savings_goal"]
     advice_style = st.session_state["advice_style"]
 
     # Comparison with Household Averages
+    # Comparison with Household Averages
     st.markdown('<div class="section-title">Household Usage Comparison</div>', unsafe_allow_html=True)
     avg_usage_by_household_size = {
-        1: 50, 2: 90, 3: 120, 4: 150, 5: 180
+        1: total_usage_city, 2: total_usage_city*2, 3: total_usage_city*2.5, 4: total_usage_city*2.75, 5: total_usage_city*3
     }
-    avg_for_household_size = avg_usage_by_household_size.get(household_size, 100)
-    st.write(f"**Comparison**: The average water usage for a {household_size}-person household is approximately {avg_for_household_size} gallons per day.")
+    # Check if household size is within the predefined range or requires calculation
+    if household_size in avg_usage_by_household_size:
+        avg_for_household_size = avg_usage_by_household_size[household_size]
+    else:
+    # Calculate average usage for household sizes greater than 5
+        avg_for_household_size = total_usage_city * (((household_size - 5) * 0.1) + 3)
+
+    st.write(f"**Comparison**: The average water usage for a {household_size}-person household is approximately {avg_for_household_size:.2f} gallons per day.")
     if total_usage > avg_for_household_size:
         st.write("Your water usage is **above average** compared to similar households. Consider implementing water-saving measures.")
     else:
