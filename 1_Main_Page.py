@@ -49,7 +49,7 @@ def add_logo():
     st.sidebar.markdown(
         f"""
         <div style="text-align: center; margin-bottom: 20px;">
-            <img src="data:image/png;base64,{convert_image_to_base64(logo_path)}" alt="Logo" style="width: 200px; border-radius: 10%;">
+            <img src="data:image/png;base64,{convert_image_to_base64(logo_path)}" alt="Logo" style="width: 500px; border-radius: 10%;">
         </div>
         """,
         unsafe_allow_html=True
