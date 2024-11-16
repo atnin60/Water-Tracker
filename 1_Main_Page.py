@@ -42,6 +42,26 @@ def get_completion(prompt):
         temperature=0.7
     )
     return response.choices[0].message['content'].strip()
+import streamlit as st
+
+def add_logo():
+    logo_path = "Pages/logo/logo.png"  # Update this path based on your project structure
+    st.sidebar.markdown(
+        f"""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="data:image/png;base64,{convert_image_to_base64(logo_path)}" alt="Logo" style="width: 200px; border-radius: 10%;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+def convert_image_to_base64(image_path):
+    import base64
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+
+    
 
 # Thematic styling
 st.set_page_config(page_title="💧 Water Usage Tracker", layout="wide")
@@ -66,14 +86,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Define the path to the logo
-logo_path = "Pages/logo/Wave_logo.png"
-
-# Sidebar Logo Placement
-if os.path.exists(logo_path):
-    st.sidebar.image(logo_path, use_column_width=True)  # Place logo in sidebar
-else:
-    st.sidebar.warning("Logo not found. Please check the path.")
+# Call the function to add the logo to the sidebar
+add_logo()
 
 
 # Multi-step navigation
