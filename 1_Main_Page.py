@@ -158,17 +158,64 @@ elif step == "View Report":
         )
         st.plotly_chart(fig_comparison)
 
-        # Cost Calculations
+       # Dropdown menu for cost calculations
         st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
-        cost_per_gallon = 0.1
+
+        cost_graph_choice = st.selectbox(
+            "Select a cost graph to view:",
+            ["Estimated Daily Cost", "Estimated Monthly Cost", "Estimated Yearly Cost"],
+            key="cost_graph_choice"
+        )
+
+        # Define cost parameters
+        cost_per_gallon = 0.1  # Cost per gallon in USD
         total_usage = data["Total Usage (gallons)"].mean()
         estimated_cost_daily = total_usage * cost_per_gallon
         estimated_cost_monthly = estimated_cost_daily * 30
         estimated_cost_yearly = estimated_cost_daily * 365
 
-        st.metric("Daily Cost", f"${estimated_cost_daily:.2f}")
-        st.metric("Monthly Cost", f"${estimated_cost_monthly:.2f}")
-        st.metric("Yearly Cost", f"${estimated_cost_yearly:.2f}")
+        # Calculate city-specific costs
+        lower_data = pd.read_csv(city_files[st.session_state["city"]])
+        total_usage_city = lower_data["Total Usage (gallons)"].mean()
+        estimated_cost_daily_city = total_usage_city * cost_per_gallon
+        estimated_cost_monthly_city = estimated_cost_daily_city * 30
+        estimated_cost_yearly_city = estimated_cost_daily_city * 365
+
+        # Prepare data for plotting
+        costs = {
+            "Estimated Daily Cost": [estimated_cost_daily, estimated_cost_daily_city],
+            "Estimated Monthly Cost": [estimated_cost_monthly, estimated_cost_monthly_city],
+            "Estimated Yearly Cost": [estimated_cost_yearly, estimated_cost_yearly_city]
+        }
+        labels = ["Your Average", st.session_state["city"]]
+
+        # Generate horizontal bar plot with labels on each bar
+        fig_cost = px.bar(
+            y=labels,
+            x=costs[cost_graph_choice],
+            orientation='h',  # Set horizontal orientation
+            title=f"{cost_graph_choice} Comparison",
+            labels={"y": "Type", "x": "Cost in USD"},
+            color=labels,
+            color_discrete_map={"Your Average": "#1E88E5", st.session_state["city"]: "#FFA726"},
+            text=costs[cost_graph_choice]  # Add cost values as labels
+        )
+
+        # Update trace to increase text size, bolden the font on bars
+        fig_cost.update_traces(
+            texttemplate='<b>$%{text:.2f}</b>',  # Format labels as currency and bold
+            textposition='outside',              # Position labels outside bars
+            textfont=dict(size=16)               # Increase label font size and make bold
+        )
+
+        # Update layout to increase font sizes for title, axis labels, and tick labels
+        fig_cost.update_layout(
+            title=dict(text=f"{cost_graph_choice} Comparison", font=dict(size=20)),
+            xaxis=dict(title="Cost in USD", titlefont=dict(size=16), tickfont=dict(size=14)),
+            yaxis=dict(title="", tickfont=dict(size=16))
+        )
+
+        st.plotly_chart(fig_cost)
 
         # Water Trend Over Time
         st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
