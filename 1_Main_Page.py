@@ -44,8 +44,9 @@ def get_completion(prompt):
     return response.choices[0].message['content'].strip()
 import streamlit as st
 
+#Adding logo to sidebar
 def add_logo():
-    logo_path = "Pages/logo/logo.png"  # Update this path based on your project structure
+    logo_path = "Pages/logo/logo.png"  
     st.sidebar.markdown(
         f"""
         <div style="text-align: center; margin-bottom: 20px;">
@@ -130,6 +131,8 @@ elif step == "View Report":
         data_path = city_files[st.session_state["city"]]
         lower_data = pd.read_csv(data_path)
         numeric_columns = data.select_dtypes(include=[np.number]).columns
+        
+        # Calculate average usage
         avg_usage = data[numeric_columns].mean().to_dict()
         avg_usage.pop("Total Usage (gallons)", None)
 
@@ -138,6 +141,7 @@ elif step == "View Report":
         st.write("Here is your average daily water usage for each activity:")
         st.table(avg_usage_df)
 
+        # Calculate city average usage
         city_avg_usage = lower_data[numeric_columns].mean().to_dict()
         city_avg_usage.pop("Total Usage (gallons)", None)
         comparison_df = pd.DataFrame({
@@ -146,7 +150,21 @@ elif step == "View Report":
             "City Average (gallons)": [city_avg_usage.get(activity, 0) * avg_for_household_size for activity in avg_usage_df["Activity"]]
         })
 
-        # Comparison Chart
+        # Generate AI Insights: Prompt for Analysis
+        ai_prompt_comparison = (
+            f"In {st.session_state['city']}, we compared the average daily water usage of your household to the city averages "
+            f"for the following activities: {', '.join(comparison_df['Activity'])}. "
+            f"Your household uses {avg_usage_df['Average Daily Gallons'].sum():.2f} gallons per day, while the city average is "
+            f"{sum(comparison_df['City Average (gallons)']):.2f} gallons per day for a household of similar size. "
+            f"Please analyze these differences and provide actionable insights to reduce water consumption where your usage is above average."
+        )
+        ai_comparison_insights = get_completion(ai_prompt_comparison)
+
+        # Display AI insights for comparison
+        st.markdown('<div class="section-title">AI-Powered Insights on Usage Comparison</div>', unsafe_allow_html=True)
+        st.write(ai_comparison_insights)
+
+        # Generate and display comparison chart
         st.markdown('<div class="section-title">Comparison of Your Usage vs. City Average</div>', unsafe_allow_html=True)
         fig_comparison = px.bar(
             comparison_df,
@@ -158,7 +176,20 @@ elif step == "View Report":
         )
         st.plotly_chart(fig_comparison)
 
-       # Dropdown menu for cost calculations
+        # Generate AI Insights: Recommendations
+        ai_prompt_recommendations = (
+            f"Based on the water usage comparison chart for your household in {st.session_state['city']}, "
+            f"provide specific recommendations for each activity where your usage exceeds the city average. "
+            "Include practical actions to reduce water consumption for each of these activities."
+        )
+        ai_recommendations = get_completion(ai_prompt_recommendations)
+
+        # Display AI recommendations
+        st.markdown('<div class="section-title">AI-Powered Recommendations for Reducing Usage</div>', unsafe_allow_html=True)
+        st.write(ai_recommendations)
+
+
+            # Dropdown menu for cost calculations
         st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
 
         cost_graph_choice = st.selectbox(
@@ -175,7 +206,8 @@ elif step == "View Report":
         estimated_cost_yearly = estimated_cost_daily * 365
 
         # Calculate city-specific costs
-        lower_data = pd.read_csv(city_files[st.session_state["city"]])
+        city = st.session_state["city"]
+        lower_data = pd.read_csv(city_files[city])
         total_usage_city = lower_data["Total Usage (gallons)"].mean()
         estimated_cost_daily_city = total_usage_city * cost_per_gallon
         estimated_cost_monthly_city = estimated_cost_daily_city * 30
@@ -187,35 +219,67 @@ elif step == "View Report":
             "Estimated Monthly Cost": [estimated_cost_monthly, estimated_cost_monthly_city],
             "Estimated Yearly Cost": [estimated_cost_yearly, estimated_cost_yearly_city]
         }
-        labels = ["Your Average", st.session_state["city"]]
+        labels = ["Your Average", city]
 
-        # Generate horizontal bar plot with labels on each bar
+        # Generate bar plot for selected cost graph
         fig_cost = px.bar(
             y=labels,
             x=costs[cost_graph_choice],
-            orientation='h',  # Set horizontal orientation
+            orientation='h',  # Horizontal bar chart
             title=f"{cost_graph_choice} Comparison",
             labels={"y": "Type", "x": "Cost in USD"},
             color=labels,
-            color_discrete_map={"Your Average": "#1E88E5", st.session_state["city"]: "#FFA726"},
+            color_discrete_map={"Your Average": "#1E88E5", city: "#FFA726"},
             text=costs[cost_graph_choice]  # Add cost values as labels
         )
 
-        # Update trace to increase text size, bolden the font on bars
+        # Update trace to increase text size and add bold font
         fig_cost.update_traces(
-            texttemplate='<b>$%{text:.2f}</b>',  # Format labels as currency and bold
-            textposition='outside',              # Position labels outside bars
-            textfont=dict(size=16)               # Increase label font size and make bold
+            texttemplate='<b>$%{text:.2f}</b>',
+            textposition='outside',
+            textfont=dict(size=16)
         )
 
-        # Update layout to increase font sizes for title, axis labels, and tick labels
+        # Update layout for better readability
         fig_cost.update_layout(
             title=dict(text=f"{cost_graph_choice} Comparison", font=dict(size=20)),
             xaxis=dict(title="Cost in USD", titlefont=dict(size=16), tickfont=dict(size=14)),
             yaxis=dict(title="", tickfont=dict(size=16))
         )
 
+        # Display cost graph
         st.plotly_chart(fig_cost)
+
+        # Generate AI insights for cost analysis
+        ai_prompt_cost_insights = (
+            f"In {city}, the water cost comparison shows that your household incurs "
+            f"{cost_graph_choice.lower()} of ${costs[cost_graph_choice][0]:.2f}, "
+            f"while the city average for a household of similar size is ${costs[cost_graph_choice][1]:.2f}. "
+            "Analyze the potential reasons for these differences in cost and provide actionable strategies "
+            "to reduce your household's water expenses without compromising necessary usage."
+        )
+
+        # Fetch AI-generated insights
+        ai_cost_insights = get_completion(ai_prompt_cost_insights)
+
+        # Display AI insights related to cost
+        st.markdown('<div class="section-title">AI-Powered Cost Insights</div>', unsafe_allow_html=True)
+        st.write(ai_cost_insights)
+
+        # Generate AI-powered recommendations for cost reduction
+        ai_prompt_cost_recommendations = (
+            f"Based on the selected cost graph ({cost_graph_choice}) for your household in {city}, "
+            "suggest specific measures to reduce water costs. Focus on high-impact, cost-effective actions "
+            "such as adjusting habits, using efficient appliances, or optimizing systems."
+        )
+
+        # Fetch AI recommendations
+        ai_cost_recommendations = get_completion(ai_prompt_cost_recommendations)
+
+        # Display AI recommendations for cost reduction
+        st.markdown('<div class="section-title">AI-Powered Cost Reduction Recommendations</div>', unsafe_allow_html=True)
+        st.write(ai_cost_recommendations)
+
 
         # Water Trend Over Time
         st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
