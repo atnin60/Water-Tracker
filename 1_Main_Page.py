@@ -32,7 +32,7 @@ city_files = {
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_completion(prompt):
-    response = openai.ChatCompletion.acreate(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a resourceful water-saving advisor providing actionable water-saving advice."},
