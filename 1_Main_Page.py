@@ -148,48 +148,11 @@ elif step == "View Report":
             "Activity": avg_usage_df["Activity"],
             "Your Usage (gallons)": avg_usage_df["Average Daily Gallons"],
             "City Average (gallons)": [city_avg_usage.get(activity, 0) * avg_for_household_size for activity in avg_usage_df["Activity"]]
+
         })
 
-        # Generate AI Insights: Prompt for Analysis
-        ai_prompt_comparison = (
-            f"In {st.session_state['city']}, we compared the average daily water usage of your household to the city averages "
-            f"for the following activities: {', '.join(comparison_df['Activity'])}. "
-            f"Your household uses {avg_usage_df['Average Daily Gallons'].sum():.2f} gallons per day, while the city average is "
-            f"{sum(comparison_df['City Average (gallons)']):.2f} gallons per day for a household of similar size. "
-            f"Please analyze these differences and provide actionable insights to reduce water consumption where your usage is above average."
-        )
-        ai_comparison_insights = get_completion(ai_prompt_comparison)
 
-        # Display AI insights for comparison
-        st.markdown('<div class="section-title">AI-Powered Insights on Usage Comparison</div>', unsafe_allow_html=True)
-        st.write(ai_comparison_insights)
-
-        # Generate and display comparison chart
-        st.markdown('<div class="section-title">Comparison of Your Usage vs. City Average</div>', unsafe_allow_html=True)
-        fig_comparison = px.bar(
-            comparison_df,
-            x="Activity",
-            y=["Your Usage (gallons)", "City Average (gallons)"],
-            barmode="group",
-            title="Daily Water Usage Comparison",
-            labels={"value": "Gallons", "variable": "Type"},
-        )
-        st.plotly_chart(fig_comparison)
-
-        # Generate AI Insights: Recommendations
-        ai_prompt_recommendations = (
-            f"Based on the water usage comparison chart for your household in {st.session_state['city']}, "
-            f"provide specific recommendations for each activity where your usage exceeds the city average. "
-            "Include practical actions to reduce water consumption for each of these activities."
-        )
-        ai_recommendations = get_completion(ai_prompt_recommendations)
-
-        # Display AI recommendations
-        st.markdown('<div class="section-title">AI-Powered Recommendations for Reducing Usage</div>', unsafe_allow_html=True)
-        st.write(ai_recommendations)
-
-
-            # Dropdown menu for cost calculations
+     # Dropdown menu for cost calculations
         st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
 
         cost_graph_choice = st.selectbox(
@@ -262,9 +225,10 @@ elif step == "View Report":
         # Fetch AI-generated insights
         ai_cost_insights = get_completion(ai_prompt_cost_insights)
 
-        # Display AI insights related to cost
-        st.markdown('<div class="section-title">AI-Powered Cost Insights</div>', unsafe_allow_html=True)
-        st.write(ai_cost_insights)
+        # Create Collapsible Section for AI-Powered Cost Insights
+        with st.expander("AI-Powered Cost Insights"):
+            st.write(ai_cost_insights)
+
 
         # Generate AI-powered recommendations for cost reduction
         ai_prompt_cost_recommendations = (
@@ -276,11 +240,54 @@ elif step == "View Report":
         # Fetch AI recommendations
         ai_cost_recommendations = get_completion(ai_prompt_cost_recommendations)
 
-        # Display AI recommendations for cost reduction
-        st.markdown('<div class="section-title">AI-Powered Cost Reduction Recommendations</div>', unsafe_allow_html=True)
-        st.write(ai_cost_recommendations)
+        # Create Collapsible Section for AI-Powered Cost Reduction Recommendations
+        with st.expander("AI-Powered Cost Reduction Recommendations"):
+            st.write(ai_cost_recommendations)
 
 
+
+        # Generate AI Insights: Prompt for Analysis
+        ai_prompt_comparison = (
+            f"In {st.session_state['city']}, we compared the average daily water usage of your household to the city averages "
+            f"for the following activities: {', '.join(comparison_df['Activity'])}. "
+            f"Your household uses {avg_usage_df['Average Daily Gallons'].sum():.2f} gallons per day, while the city average is "
+            f"{sum(comparison_df['City Average (gallons)']):.2f} gallons per day for a household of similar size. "
+            f"Please analyze these differences and provide actionable insights to reduce water consumption where your usage is above average."
+        )
+        ai_comparison_insights = get_completion(ai_prompt_comparison)
+
+        # Create Collapsible Section for AI-Powered Insights on Usage Comparison
+        with st.expander("AI-Powered Insights on Usage Comparison"):
+            st.write(ai_comparison_insights)
+
+
+        # Generate and display comparison chart
+        st.markdown('<div class="section-title">Comparison of Your Usage vs. City Average</div>', unsafe_allow_html=True)
+        fig_comparison = px.bar(
+            comparison_df,
+            x="Activity",
+            y=["Your Usage (gallons)", "City Average (gallons)"],
+            barmode="group",
+            title="Daily Water Usage Comparison",
+            labels={"value": "Gallons", "variable": "Type"},
+        )
+        st.plotly_chart(fig_comparison)
+
+        # Generate AI Insights: Recommendations
+        ai_prompt_recommendations = (
+            f"Based on the water usage comparison chart for your household in {st.session_state['city']}, "
+            f"provide specific recommendations for each activity where your usage exceeds the city average. "
+            "Include practical actions to reduce water consumption for each of these activities."
+        )
+        ai_recommendations = get_completion(ai_prompt_recommendations)
+
+        # Create Collapsible Section for AI-Powered Recommendations for Reducing Usage
+        with st.expander("AI-Powered Recommendations for Reducing Usage"):
+            st.write(ai_recommendations)
+
+
+
+    
         # Water Trend Over Time
         st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
         data['Date'] = pd.to_datetime(data['Date'])
