@@ -41,7 +41,7 @@ def get_completion(prompt):
         max_tokens=750,
         temperature=0.7
     )
-    return response.choices[0].message['content'].strip()
+    print(response["choices"][0]["message"]["content"])
 import streamlit as st
 
 #Adding logo to sidebar
