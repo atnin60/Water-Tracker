@@ -32,7 +32,7 @@ city_files = {
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_completion(prompt):
-    response = openai.ChatCompletion.create(
+    response = openai.ChatCompletion.acreate(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a resourceful water-saving advisor providing actionable water-saving advice."},
@@ -41,7 +41,7 @@ def get_completion(prompt):
         max_tokens=750,
         temperature=0.7
     )
-    return response.choices[0].message['content'].strip()
+    print(response["choices"][0]["message"]["content"])
 import streamlit as st
 
 #Adding logo to sidebar
@@ -98,14 +98,12 @@ if step == "Enter Details":
     st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
     household_size = st.number_input("Number of people in household", min_value=1, step=1)
     city = st.selectbox("Choose a city:", list(city_files.keys()))
-    advice_style = st.radio("Select the style of advice:", ["Concise tips", "Detailed advice", "Friendly reminders"])
     savings_goal = st.number_input("Savings goal (USD):", min_value=0.0, step=1.0)
     total_usage = data["Total Usage (gallons)"].mean()
 
     if st.button("Proceed to Report"):
         st.session_state["household_size"] = household_size
         st.session_state["city"] = city
-        st.session_state["advice_style"] = advice_style
         st.session_state["savings_goal"] = savings_goal
         st.success("Details saved! Navigate to 'View Report' for analysis.")
         st.session_state["data"] = data
