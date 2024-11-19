@@ -10,7 +10,7 @@ import plotly.express as px
 # Load datasets
 data = pd.read_csv('Pages/Data/Synthetic Water Usage.csv')
 city_files = {
-    "Los Altos Hills": "Pages/Data/Los_Altos_Hills_Water_Usage.csv",
+    "L.A. Hills": "Pages/Data/L.A._Hills_Water_Usage.csv",
     "Palo Alto": "Pages/Data/Palo_Alto_Water_Usage.csv",
     "Mountain View": "Pages/Data/Mountain_View_Water_Usage.csv",
     "Los Altos": "Pages/Data/Los_Altos_Water_Usage.csv",
@@ -32,7 +32,7 @@ city_files = {
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_completion(prompt):
-    response = openai.ChatCompletion.create(
+    response = openai.ChatCompletion.acreate(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a resourceful water-saving advisor providing actionable water-saving advice."},
@@ -321,7 +321,6 @@ elif step == "Insights":
         total_usage = st.session_state["total_usage"]
 
         savings_goal = st.session_state["savings_goal"]
-        advice_style = st.session_state["advice_style"]
         avg_for_household_size = st.session_state["avg_for_household_size"]
 
         # Comparison with Household Averages
@@ -339,7 +338,6 @@ elif step == "Insights":
             f"I have a household with {household_size} people. "
             f"Our daily water usage is around {total_usage:.2f} gallons. "
             f"We want to save ${savings_goal:.2f} on our water bill. "
-            f"The user prefers '{advice_style}' advice. "
             "Based on the my water usage statistics, please provide a detailed analysis of what causes the high household water consumption for me. "
             "Also be sure to include my water usage amount, as well as the price. "
             "In this analysis, identify the high usage areas. "
