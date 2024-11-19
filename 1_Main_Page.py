@@ -10,7 +10,7 @@ import plotly.express as px
 # Load datasets
 data = pd.read_csv('Pages/Data/Synthetic Water Usage.csv')
 city_files = {
-    "L.A. Hills": "Pages/Data/L.A._Hills_Water_Usage.csv",
+    "Los Altos Hills": "Pages/Data/Los_Altos_Hills_Water_Usage.csv",
     "Palo Alto": "Pages/Data/Palo_Alto_Water_Usage.csv",
     "Mountain View": "Pages/Data/Mountain_View_Water_Usage.csv",
     "Los Altos": "Pages/Data/Los_Altos_Water_Usage.csv",
