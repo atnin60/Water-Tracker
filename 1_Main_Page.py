@@ -93,7 +93,7 @@ add_logo()
 
 
 # Multi-step navigation
-step = st.sidebar.radio("Navigation:", ["Enter Details", "View Report", "Insights"])
+step = st.sidebar.radio("Navigation:", ["Enter Details", "View Report"])
 
 if step == "Enter Details":
     st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
@@ -127,8 +127,8 @@ if step == "Enter Details":
 
         st.session_state["avg_for_household_size"] = avg_for_household_size
 
-elif step == "View Report":
-    st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
+#elif step == "View Report":
+    #st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
 
 
     if "city" in st.session_state:
@@ -213,7 +213,7 @@ elif step == "View Report":
         # Display the smaller cost graph
         st.plotly_chart(fig_cost)
 
-
+        
         # Update trace to increase text size and add bold font
         fig_cost.update_traces(
             texttemplate='<b>$%{text:.2f}</b>',
@@ -230,7 +230,7 @@ elif step == "View Report":
 
         # Display cost graph
         st.plotly_chart(fig_cost)
-
+        
         # Generate AI insights for cost analysis
         ai_prompt_cost_insights = (
             f"In {city}, the water cost comparison shows that your household incurs "
@@ -327,60 +327,27 @@ elif step == "View Report":
             'City Average (gallons)': lower_data['Total Usage (gallons)'] * avg_for_household_size
         })
 
-        fig_trend, ax_trend = plt.subplots(figsize=(10, 6))
-        ax_trend.plot(trend_data_combined.index, trend_data_combined['Your Usage (gallons)'], label='Your Usage (gallons)', color='blue', linewidth=2)
-        ax_trend.plot(trend_data_combined.index, trend_data_combined['City Average (gallons)'], label='City Average (gallons)', color='orange', linewidth=2)
-        ax_trend.set_title("Water Usage Trend Over Time", fontsize=16, color='#0277BD')
-        ax_trend.set_xlabel("Date", fontsize=14, color='#0277BD')
-        ax_trend.set_ylabel("Gallons", fontsize=14, color='#0277BD')
-        ax_trend.legend(fontsize=12)
-        ax_trend.grid(True, linestyle='--', alpha=0.6)
-        plt.xticks(rotation=45)
+        # Create a smaller figure size
+        fig_trend, ax_trend = plt.subplots(figsize=(4, 2))  # Reduced size
+
+        # Plot the data with adjusted line widths and font sizes
+        ax_trend.plot(trend_data_combined.index, trend_data_combined['Your Usage (gallons)'], 
+                    label='Your Usage (gallons)', color='blue', linewidth=1.5)  # Reduced linewidth
+        ax_trend.plot(trend_data_combined.index, trend_data_combined['City Average (gallons)'], 
+                    label='City Average (gallons)', color='orange', linewidth=1.5)  # Reduced linewidth
+
+        # Adjust title, labels, and legend font sizes
+        ax_trend.set_title("Water Usage Trend Over Time", fontsize=10, color='#0277BD')  # Smaller title
+        ax_trend.set_xlabel("Date", fontsize=8, color='#0277BD')  # Smaller x-axis label
+        ax_trend.set_ylabel("Gallons", fontsize=8, color='#0277BD')  # Smaller y-axis label
+        ax_trend.legend(fontsize=8)  # Smaller legend
+        ax_trend.grid(True, linestyle='--', alpha=0.6)  # Keep gridlines as is
+
+        # Adjust tick parameters
+        plt.xticks(rotation=45, fontsize=7)  # Smaller x-ticks
+        plt.yticks(fontsize=7)  # Smaller y-ticks
+
+        # Display the plot
         st.pyplot(fig_trend)
-
-elif step == "Insights":
-    st.markdown('<div class="section-title">Personalized Insights and AI Suggestions</div>', unsafe_allow_html=True)
-
-    if "data" in st.session_state:
-        # Retrieve stored session data
-        data = st.session_state["data"]
-        household_size = st.session_state["household_size"]
-        city = st.session_state["city"]
-        total_usage = st.session_state["total_usage"]
-
-        savings_goal = st.session_state["savings_goal"]
-        avg_for_household_size = st.session_state["avg_for_household_size"]
-
-        # Comparison with Household Averages
-        st.markdown('<div class="section-title">Household Usage Comparison</div>', unsafe_allow_html=True)
-
-        st.write(f"**Comparison**: The average water usage for a {household_size}-person household is approximately {avg_for_household_size:.2f} gallons per day.")
-        if total_usage > avg_for_household_size:
-            st.write("Your water usage is **above average** compared to similar households. Consider implementing water-saving measures.")
-        else:
-            st.write("Your water usage is **below average** compared to similar households. Keep up the good work!")
-
-        # Generative AI Suggestions for Water Savings
-        st.markdown('<div class="section-title">Personalized AI-Generated Water-Saving Suggestions</div>', unsafe_allow_html=True)
-        prompt = (
-            f"I have a household with {household_size} people. "
-            f"Our daily water usage is around {total_usage:.2f} gallons. "
-            f"We want to save ${savings_goal:.2f} on our water bill. "
-            f"The user prefers concise tips and details advice. "
-            f"The user prefers concise tips and details advice. "
-            "Based on the my water usage statistics, please provide a detailed analysis of what causes the high household water consumption for me. "
-            "Also be sure to include my water usage amount, as well as the price. "
-            "In this analysis, identify the high usage areas. "
-            "For the analysis, use the following template for what to say:\n"
-            "'Based on your current water usage of ___ gallons per day and your goal to save $___ on your water bill, here are some concise tips to help you achieve your water-saving and cost-saving goals:'\n"
-            "Following this analysis, provide recommendations on how to save water in each high usage problem area based on the average daily water usage by activity graph on the first page of the application. "
-            "Consider factors such as my family size, lifestyle habits, and common appliances in use. "
-            "It is also important to take into account my data on water usage and prices and compare it to the selected city's average to determine which of my activities is above average and create personalized recommendations to reduce water usage. "
-            "Please include practical suggestions such as changes in daily routines that can be adopted to reduce water usage effectively. "
-            "You should have the following headers: **Analysis of High Household Water Consumption**, **Identified High Usage Areas**, **Recommendations for Water Savings**, and **Additional Tips for Water Savings**. "
-            "Be sure to increase the size of these headers and make them bold."
-        )
-        suggestions = get_completion(prompt)
-        st.write(suggestions)
     else:
         st.warning("No data available. Please go to the main page to input details and generate a report.")
