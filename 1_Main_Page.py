@@ -52,8 +52,8 @@ def add_logo():
         <style>
             .logo-container {{
                 text-align: center;
-                margin-top: -80px; /* Adjust this to reduce top white space */
-                margin-bottom: -80px; /* Adjust this to reduce bottom white space */
+                margin-top: -125px; /* Adjust this to reduce top white space */
+                margin-bottom: -125px; /* Adjust this to reduce bottom white space */
             }}
             .logo-container img {{
                 width: 300px; /* Adjust size to your preference */
