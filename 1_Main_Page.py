@@ -37,7 +37,7 @@ def get_completion(prompt):
             {"role": "system", "content": "You are a resourceful water-saving advisor providing actionable water-saving advice."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=750,
+        max_tokens=4000,
         temperature=0.7
     )
     return response.choices[0].message['content'].strip()
@@ -113,12 +113,17 @@ if step == "Enter Details":
         avg_usage_by_household_size = {
             1: 1, 2: 2, 3: 2.5, 4: 2.75, 5: 3
         }
+
+        big_household = {
+            5: 5, 0.1: 0.1, 3: 3
+            }
+
         # Check if household size is within the predefined range or requires calculation
         if household_size in avg_usage_by_household_size:
             avg_for_household_size = avg_usage_by_household_size[household_size]
         else:
             # Calculate average usage for household sizes greater than 5
-            avg_for_household_size = (((household_size - 5) * 0.1) + 3)
+            avg_for_household_size = (((household_size - big_household[5]) * big_household[0.1]) + big_household[3])
 
         st.session_state["avg_for_household_size"] = avg_for_household_size
 
@@ -147,7 +152,7 @@ elif step == "View Report":
         city_avg_usage.pop("Total Usage (gallons)", None)
         comparison_df = pd.DataFrame({
             "Activity": avg_usage_df["Activity"],
-            "Your Usage (gallons)": avg_usage_df["Average Daily Gallons"],
+            "Your Usage (gallons)": avg_usage_df["Average Daily Gallons"] * avg_for_household_size,
             "City Average (gallons)": [city_avg_usage.get(activity, 0) * avg_for_household_size for activity in avg_usage_df["Activity"]]
 
         })
@@ -165,7 +170,7 @@ elif step == "View Report":
         # Define cost parameters
         cost_per_gallon = 0.1  # Cost per gallon in USD
         total_usage = data["Total Usage (gallons)"].mean()
-        estimated_cost_daily = total_usage * cost_per_gallon
+        estimated_cost_daily = total_usage * cost_per_gallon * avg_for_household_size
         estimated_cost_monthly = estimated_cost_daily * 30
         estimated_cost_yearly = estimated_cost_daily * 365
 
@@ -173,7 +178,7 @@ elif step == "View Report":
         city = st.session_state["city"]
         lower_data = pd.read_csv(city_files[city])
         total_usage_city = lower_data["Total Usage (gallons)"].mean()
-        estimated_cost_daily_city = total_usage_city * cost_per_gallon
+        estimated_cost_daily_city = total_usage_city * cost_per_gallon * avg_for_household_size
         estimated_cost_monthly_city = estimated_cost_daily_city * 30
         estimated_cost_yearly_city = estimated_cost_daily_city * 365
 
@@ -318,8 +323,8 @@ elif step == "View Report":
         lower_data.set_index('Date', inplace=True)
 
         trend_data_combined = pd.DataFrame({
-            'Your Usage (gallons)': data['Total Usage (gallons)'],
-            'City Average (gallons)': lower_data['Total Usage (gallons)']
+            'Your Usage (gallons)': data['Total Usage (gallons)'] * avg_for_household_size,
+            'City Average (gallons)': lower_data['Total Usage (gallons)'] * avg_for_household_size
         })
 
         fig_trend, ax_trend = plt.subplots(figsize=(10, 6))
