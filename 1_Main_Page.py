@@ -1,4 +1,3 @@
-# Improved 1_Main_Page.py with Enhanced UI/UX
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,7 +9,7 @@ import plotly.express as px
 # Load datasets
 data = pd.read_csv('Pages/Data/Synthetic Water Usage.csv')
 city_files = {
-    "L.A. Hills": "Pages/Data/L.A._Hills_Water_Usage.csv",
+    "Los Altos Hills": "Pages/Data/Los_Altos_Hills_Water_Usage.csv",
     "Palo Alto": "Pages/Data/Palo_Alto_Water_Usage.csv",
     "Mountain View": "Pages/Data/Mountain_View_Water_Usage.csv",
     "Los Altos": "Pages/Data/Los_Altos_Water_Usage.csv",
@@ -32,7 +31,7 @@ city_files = {
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_completion(prompt):
-    response = openai.ChatCompletion.acreate(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a resourceful water-saving advisor providing actionable water-saving advice."},
@@ -41,7 +40,7 @@ def get_completion(prompt):
         max_tokens=750,
         temperature=0.7
     )
-    print(response["choices"][0]["message"]["content"])
+    return response.choices[0].message['content'].strip()
 import streamlit as st
 
 #Adding logo to sidebar
@@ -62,7 +61,7 @@ def convert_image_to_base64(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-    
+
 
 # Thematic styling
 st.set_page_config(page_title="💧 Water Usage Tracker", layout="wide")
@@ -123,13 +122,13 @@ if step == "Enter Details":
 
 elif step == "View Report":
     st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
-    
+
     if "city" in st.session_state:
         avg_for_household_size = st.session_state["avg_for_household_size"]
         data_path = city_files[st.session_state["city"]]
         lower_data = pd.read_csv(data_path)
         numeric_columns = data.select_dtypes(include=[np.number]).columns
-        
+
         # Calculate average usage
         avg_usage = data[numeric_columns].mean().to_dict()
         avg_usage.pop("Total Usage (gallons)", None)
@@ -193,6 +192,18 @@ elif step == "View Report":
             color_discrete_map={"Your Average": "#1E88E5", city: "#FFA726"},
             text=costs[cost_graph_choice]  # Add cost values as labels
         )
+
+        # Adjust the size of the figure
+        fig_cost.update_layout(
+            width=500,  # Set the width of the chart
+            height=200,  # Set the height of the chart
+            title=dict(font=dict(size=16)),  # Adjust title font size if needed
+            margin=dict(l=50, r=50, t=50, b=50)  # Adjust margins to reduce whitespace
+        )
+
+        # Display the smaller cost graph
+        st.plotly_chart(fig_cost)
+
 
         # Update trace to increase text size and add bold font
         fig_cost.update_traces(
@@ -269,6 +280,14 @@ elif step == "View Report":
             title="Daily Water Usage Comparison",
             labels={"value": "Gallons", "variable": "Type"},
         )
+         # Adjust the size of the figure
+        fig_comparison.update_layout(
+            width=500,  # Set the width of the chart
+            height=200,  # Set the height of the chart
+            title=dict(font=dict(size=16)),  # Adjust title font size if needed
+            margin=dict(l=50, r=50, t=50, b=50)  # Adjust margins to reduce whitespace
+        )
+        
         st.plotly_chart(fig_comparison)
 
         # Generate AI Insights: Recommendations
@@ -285,7 +304,6 @@ elif step == "View Report":
 
 
 
-    
         # Water Trend Over Time
         st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
         data['Date'] = pd.to_datetime(data['Date'])
@@ -321,7 +339,6 @@ elif step == "Insights":
         total_usage = st.session_state["total_usage"]
 
         savings_goal = st.session_state["savings_goal"]
-        advice_style = st.session_state["advice_style"]
         avg_for_household_size = st.session_state["avg_for_household_size"]
 
         # Comparison with Household Averages
@@ -339,7 +356,7 @@ elif step == "Insights":
             f"I have a household with {household_size} people. "
             f"Our daily water usage is around {total_usage:.2f} gallons. "
             f"We want to save ${savings_goal:.2f} on our water bill. "
-            f"The user prefers '{advice_style}' advice. "
+            f"The user prefers concise tips and details advice. "
             "Based on the my water usage statistics, please provide a detailed analysis of what causes the high household water consumption for me. "
             "Also be sure to include my water usage amount, as well as the price. "
             "In this analysis, identify the high usage areas. "
@@ -356,4 +373,3 @@ elif step == "Insights":
         st.write(suggestions)
     else:
         st.warning("No data available. Please go to the main page to input details and generate a report.")
-
