@@ -41,6 +41,7 @@ def get_completion(prompt):
         temperature=0.7
     )
     return response.choices[0].message['content'].strip()
+    return response.choices[0].message['content'].strip()
 import streamlit as st
 
 #Adding logo to sidebar
@@ -59,6 +60,7 @@ def convert_image_to_base64(image_path):
     import base64
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
+
 
 
 
@@ -123,11 +125,13 @@ if step == "Enter Details":
 elif step == "View Report":
     st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
 
+
     if "city" in st.session_state:
         avg_for_household_size = st.session_state["avg_for_household_size"]
         data_path = city_files[st.session_state["city"]]
         lower_data = pd.read_csv(data_path)
         numeric_columns = data.select_dtypes(include=[np.number]).columns
+
 
         # Calculate average usage
         avg_usage = data[numeric_columns].mean().to_dict()
@@ -304,6 +308,7 @@ elif step == "View Report":
 
 
 
+
         # Water Trend Over Time
         st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
         data['Date'] = pd.to_datetime(data['Date'])
@@ -356,6 +361,7 @@ elif step == "Insights":
             f"I have a household with {household_size} people. "
             f"Our daily water usage is around {total_usage:.2f} gallons. "
             f"We want to save ${savings_goal:.2f} on our water bill. "
+            f"The user prefers concise tips and details advice. "
             f"The user prefers concise tips and details advice. "
             "Based on the my water usage statistics, please provide a detailed analysis of what causes the high household water consumption for me. "
             "Also be sure to include my water usage amount, as well as the price. "
