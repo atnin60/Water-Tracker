@@ -9,20 +9,20 @@ import plotly.express as px
 # Load datasets
 data = pd.read_csv('Pages/Data/Synthetic Water Usage.csv')
 city_files = {
-    "Los Altos Hills": "Pages/Data/Los_Altos_Hills_Water_Usage.csv",
-    "Palo Alto": "Pages/Data/Palo_Alto_Water_Usage.csv",
-    "Mountain View": "Pages/Data/Mountain_View_Water_Usage.csv",
-    "Los Altos": "Pages/Data/Los_Altos_Water_Usage.csv",
-    "Santa Clara": "Pages/Data/Santa_Clara_Water_Usage.csv",
-    "San Jose": "Pages/Data/San_Jose_Water_Usage.csv",
-    "Monte Sereno": "Pages/Data/Monte_Sereno_Water_Usage.csv",
-    "Los Gatos": "Pages/Data/Los_Gatos_Water_Usage.csv",
-    "Morgan Hill": "Pages/Data/Morgan_Hill_Water_Usage.csv",
     "Campbell": "Pages/Data/Campbell_Water_Usage1.csv",
     "Cupertino": "Pages/Data/Cupertino_Water_Usage1.csv",
     "Gilroy": "Pages/Data/Gilroy_Water_Usage1.csv",
+    "Los Altos": "Pages/Data/Los_Altos_Water_Usage.csv",
+    "Los Altos Hills": "Pages/Data/Los_Altos_Hills_Water_Usage.csv",
+    "Los Gatos": "Pages/Data/Los_Gatos_Water_Usage.csv",
     "Milpitas": "Pages/Data/Milpitas_Water_Usage1.csv",
+    "Monte Sereno": "Pages/Data/Monte_Sereno_Water_Usage.csv",
+    "Morgan Hill": "Pages/Data/Morgan_Hill_Water_Usage.csv",
+    "Mountain View": "Pages/Data/Mountain_View_Water_Usage.csv",
+    "Palo Alto": "Pages/Data/Palo_Alto_Water_Usage.csv",
+    "San Jose": "Pages/Data/San_Jose_Water_Usage.csv",
     "San Martin": "Pages/Data/San_Martin_Water_Usage.csv",
+    "Santa Clara": "Pages/Data/Santa_Clara_Water_Usage.csv",
     "Saratoga": "Pages/Data/Saratoga_Water_Usage1.csv",
     "Sunnyvale": "Pages/Data/Sunnyvale_Water_Usage1.csv"
 }
@@ -41,10 +41,10 @@ def get_completion(prompt):
         temperature=0.7
     )
     return response.choices[0].message['content'].strip()
-    return response.choices[0].message['content'].strip()
+    
 import streamlit as st
 
-#Adding logo to sidebar
+#Adding logo to top of the page
 def add_logo():
     logo_path = "Pages/logo/logo.png"
     st.markdown(
@@ -95,18 +95,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Call the function to add the logo to the sidebar
+# Call the function to add the logo
 add_logo()
 
-
-# Multi-step navigation
-
+#Selection menu
 st.markdown('<div class="section-title">Enter Household Details</div>', unsafe_allow_html=True)
 household_size = st.number_input("Number of people in household", min_value=1, step=1)
 city = st.selectbox("Choose a city:", list(city_files.keys()))
 savings_goal = st.number_input("Savings goal (USD):", min_value=0.0, step=1.0)
 total_usage = data["Total Usage (gallons)"].mean()
 
+#Start of website
 if st.button("Proceed to Report"):    
     st.session_state["household_size"] = household_size
     st.session_state["city"] = city
@@ -135,13 +134,11 @@ if st.button("Proceed to Report"):
 #elif step == "View Report":
 #st.markdown('<div class="section-title">Daily Water Usage Report</div>', unsafe_allow_html=True)
 
-
 if "city" in st.session_state:
     avg_for_household_size = st.session_state["avg_for_household_size"]
     data_path = city_files[st.session_state["city"]]
-    lower_data = pd.read_csv(data_path)
+    city_data = pd.read_csv(data_path)
     numeric_columns = data.select_dtypes(include=[np.number]).columns
-
 
     # Calculate average usage
     avg_usage = data[numeric_columns].mean().to_dict()
@@ -153,7 +150,7 @@ if "city" in st.session_state:
     st.table(avg_usage_df)
 
     # Calculate city average usage
-    city_avg_usage = lower_data[numeric_columns].mean().to_dict()
+    city_avg_usage = city_data[numeric_columns].mean().to_dict()
     city_avg_usage.pop("Total Usage (gallons)", None)
     comparison_df = pd.DataFrame({
         "Activity": avg_usage_df["Activity"],
@@ -166,10 +163,11 @@ if "city" in st.session_state:
     # Dropdown menu for cost calculations
     st.markdown('<div class="section-title">Estimated Water Costs</div>', unsafe_allow_html=True)
 
-    cost_graph_choice = st.selectbox(
+    # Select bar chart to view
+    cost_chart_choice = st.selectbox(
         "Select a cost graph to view:",
         ["Estimated Daily Cost", "Estimated Monthly Cost", "Estimated Yearly Cost"],
-        key="cost_graph_choice"
+        key="cost_chart_choice"
     )
 
     # Define cost parameters
@@ -181,8 +179,8 @@ if "city" in st.session_state:
 
     # Calculate city-specific costs
     city = st.session_state["city"]
-    lower_data = pd.read_csv(city_files[city])
-    total_usage_city = lower_data["Total Usage (gallons)"].mean()
+    city_data = pd.read_csv(city_files[city])
+    total_usage_city = city_data["Total Usage (gallons)"].mean()
     estimated_cost_daily_city = total_usage_city * cost_per_gallon * avg_for_household_size
     estimated_cost_monthly_city = estimated_cost_daily_city * 30
     estimated_cost_yearly_city = estimated_cost_daily_city * 365
@@ -193,44 +191,36 @@ if "city" in st.session_state:
         "Estimated Monthly Cost": [estimated_cost_monthly, estimated_cost_monthly_city],
         "Estimated Yearly Cost": [estimated_cost_yearly, estimated_cost_yearly_city]
     }
-    labels = ["Your Average", city]
+    labels = ["Your Average", f"{city} Average"]
 
     # Generate bar plot for selected cost graph
     fig_cost = px.bar(
         y=labels,
-        x=costs[cost_graph_choice],
+        x=costs[cost_chart_choice],
         orientation='h',  # Horizontal bar chart
-        title=f"{cost_graph_choice} Comparison",
+        title=f"{cost_chart_choice} Comparison",
         labels={"y": "Type", "x": "Cost in USD"},
         color=labels,
-        color_discrete_map={"Your Average": "#1E88E5", city: "#FFA726"},
-        text=costs[cost_graph_choice]  # Add cost values as labels
+        color_discrete_map={"Your Average": "#1E88E5", f"{city} Average": "#FF7F0E"},
+        text=costs[cost_chart_choice]  # Add cost values as labels
     )
 
-    # Adjust the size of the figure
-    fig_cost.update_layout(
-        width=500,  # Set the width of the chart
-        height=200,  # Set the height of the chart
-        title=dict(font=dict(size=16)),  # Adjust title font size if needed
-        margin=dict(l=50, r=50, t=50, b=50)  # Adjust margins to reduce whitespace
-    )
-
-    # Display the smaller cost graph
-    st.plotly_chart(fig_cost)
-
-    
     # Update trace to increase text size and add bold font
     fig_cost.update_traces(
         texttemplate='<b>$%{text:.2f}</b>',
         textposition='outside',
-        textfont=dict(size=16)
+        textfont=dict(size=20)
     )
 
     # Update layout for better readability
     fig_cost.update_layout(
-        title=dict(text=f"{cost_graph_choice} Comparison", font=dict(size=20)),
-        xaxis=dict(title="Cost in USD", titlefont=dict(size=16), tickfont=dict(size=14)),
-        yaxis=dict(title="", tickfont=dict(size=16))
+    title=dict(text=f"{cost_chart_choice} Comparison",font=dict(size=20)),
+    xaxis=dict(title="Cost in USD",titlefont=dict(size=16),tickfont=dict(size=14), range=[0, max(costs[cost_chart_choice]) * 1.3]),
+    yaxis=dict(title="",tickfont=dict(size=16)),
+    width=1000,  # Set the width of the chart
+    height=300,  # Set the height of the chart
+    margin=dict(l=50, r=120, t=50, b=50),
+    legend_title=dict(text="") # Remove "color" text from legend title
     )
 
     # Display cost graph
@@ -239,9 +229,9 @@ if "city" in st.session_state:
     # Generate AI insights for cost analysis
     ai_prompt_cost_insights = (
         f"In {city}, the water cost comparison shows that your household incurs "
-        f"{cost_graph_choice.lower()} of ${costs[cost_graph_choice][0]:.2f}, "
-        f"while the city average for a household of similar size is ${costs[cost_graph_choice][1]:.2f}. "
-        "Analyze the potential reasons for these differences in cost and provide actionable strategies "
+        f"{cost_chart_choice.lower()} of ${costs[cost_chart_choice][0]:.2f}, "
+        f"while the city average for a household of similar size is ${costs[cost_chart_choice][1]:.2f}. "
+        f"Analyze the potential reasons for these differences in cost between {total_usage*avg_for_household_size:.2f} and {total_usage_city*avg_for_household_size:.2f} and provide actionable strategies "
         "to reduce your household's water expenses without compromising necessary usage."
     )
 
@@ -250,12 +240,17 @@ if "city" in st.session_state:
 
     # Create Collapsible Section for AI-Powered Cost Insights
     with st.expander("AI-Powered Cost Insights"):
+        st.write(f"**Comparison**: **The average water usage for a {household_size}-person household in {city} is approximately {total_usage_city*avg_for_household_size:.2f} gallons per day.**")
+        if total_usage > avg_for_household_size:
+            st.write("Your water usage is ***above average*** compared to similar households. Consider implementing water-saving measures.")
+        else:
+            st.write("Your water usage is ***below average*** compared to similar households. Keep up the good work!")
         st.write(ai_cost_insights)
 
 
     # Generate AI-powered recommendations for cost reduction
     ai_prompt_cost_recommendations = (
-        f"Based on the selected cost graph ({cost_graph_choice}) for your household in {city}, "
+        f"Based on the selected cost graph ({cost_chart_choice}) for your household in {city}, "
         "suggest specific measures to reduce water costs. Focus on high-impact, cost-effective actions "
         "such as adjusting habits, using efficient appliances, or optimizing systems."
     )
@@ -283,7 +278,6 @@ if "city" in st.session_state:
     with st.expander("AI-Powered Insights on Usage Comparison"):
         st.write(ai_comparison_insights)
 
-
     # Generate and display comparison chart
     st.markdown('<div class="section-title">Comparison of Your Usage vs. City Average</div>', unsafe_allow_html=True)
     fig_comparison = px.bar(
@@ -291,18 +285,24 @@ if "city" in st.session_state:
         x="Activity",
         y=["Your Usage (gallons)", "City Average (gallons)"],
         barmode="group",
-        title="Daily Water Usage Comparison",
-        labels={"value": "Gallons", "variable": "Type"},
+        title="Daily Water Usage Comparison (in Gallons)",
+        labels={"value": "", "variable": "Type"},
+        color_discrete_map={"Your Usage (gallons)": "#1E88E5", "City Average (gallons)": "#FF7F0E",}
     )
-        # Adjust the size of the figure
+
+    # Adjust the size of the figure
     fig_comparison.update_layout(
-        width=500,  # Set the width of the chart
-        height=200,  # Set the height of the chart
+        width=900,  # Set the width of the chart
+        height=450,  # Set the height of the chart
         title=dict(font=dict(size=16)),  # Adjust title font size if needed
-        margin=dict(l=50, r=50, t=50, b=50)  # Adjust margins to reduce whitespace
+        margin=dict(l=50, r=50, t=50, b=50),  # Adjust margins to reduce whitespace
+        legend_title=dict(text=""), # Remove "type" text from legend title
+        xaxis_title= ""  # Remove "Activity" text from the x-axis
     )
     
+    #Displaying & Centering the Chart
     st.plotly_chart(fig_comparison)
+    
 
     # Generate AI Insights: Recommendations
     ai_prompt_recommendations = (
@@ -316,43 +316,49 @@ if "city" in st.session_state:
     with st.expander("AI-Powered Recommendations for Reducing Usage"):
         st.write(ai_recommendations)
 
-
-
-
     # Water Trend Over Time
-    st.markdown('<div class="section-title">Water Usage Trend Over Time</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Water Usage Trends Graph</div>', unsafe_allow_html=True)
     data['Date'] = pd.to_datetime(data['Date'])
-    lower_data['Date'] = pd.to_datetime(lower_data['Date'])
+    city_data['Date'] = pd.to_datetime(city_data['Date'])
 
     data.set_index('Date', inplace=True)
-    lower_data.set_index('Date', inplace=True)
+    city_data.set_index('Date', inplace=True)
 
     trend_data_combined = pd.DataFrame({
         'Your Usage (gallons)': data['Total Usage (gallons)'] * avg_for_household_size,
-        'City Average (gallons)': lower_data['Total Usage (gallons)'] * avg_for_household_size
+        'City Average (gallons)': city_data['Total Usage (gallons)'] * avg_for_household_size
     })
+    
+    # Creating the figure 
+    fig = px.line(
+    trend_data_combined,
+    x=trend_data_combined.index,
+    y=['Your Usage (gallons)', 'City Average (gallons)'],
+    labels={
+        "value": "Usage (gallons)",
+        "variable": "",
+        "index": ""
+    },
+    title="Water Usage Trend Over Time (in Gallons)", 
+    color_discrete_map={"Your Usage (gallons)": "#1E88E5", "City Average (gallons)": "#FF7F0E",}
+    )
 
-    # Create a smaller figure size
-    fig_trend, ax_trend = plt.subplots(figsize=(4, 2))  # Reduced size
+    # Customize layout
+    fig.update_layout(
+    template='plotly_white',
+    xaxis_title="", # Remove "Date" text from the x-axis 
+    yaxis_title="", # Remove "Gallons" text from the y-axis
+    xaxis=dict(
+        tickformat="%b %d %Y",  # Format: "Month Day Year" (e.g., Oct 4 2024)
+        showgrid=True #Shows vertical grid lines for better readability
+        )
+    )
 
-    # Plot the data with adjusted line widths and font sizes
-    ax_trend.plot(trend_data_combined.index, trend_data_combined['Your Usage (gallons)'], 
-                label='Your Usage (gallons)', color='blue', linewidth=1.5)  # Reduced linewidth
-    ax_trend.plot(trend_data_combined.index, trend_data_combined['City Average (gallons)'], 
-                label='City Average (gallons)', color='orange', linewidth=1.5)  # Reduced linewidth
+    # Make the lines thicker
+    fig.update_traces(line=dict(width=3))  # Set line thickness to 3
+    
+    # Render the Plotly figure in Streamlit
+    st.plotly_chart(fig)
 
-    # Adjust title, labels, and legend font sizes
-    ax_trend.set_title("Water Usage Trend Over Time", fontsize=10, color='#0277BD')  # Smaller title
-    ax_trend.set_xlabel("Date", fontsize=8, color='#0277BD')  # Smaller x-axis label
-    ax_trend.set_ylabel("Gallons", fontsize=8, color='#0277BD')  # Smaller y-axis label
-    ax_trend.legend(fontsize=8)  # Smaller legend
-    ax_trend.grid(True, linestyle='--', alpha=0.6)  # Keep gridlines as is
-
-    # Adjust tick parameters
-    plt.xticks(rotation=45, fontsize=7)  # Smaller x-ticks
-    plt.yticks(fontsize=7)  # Smaller y-ticks
-
-    # Display the plot
-    st.pyplot(fig_trend)
 else:
     st.warning("No data available. Please go to the main page to input details and generate a report.")    
