@@ -1,0 +1,23 @@
+[33mcommit d5af7ce44040d4af7a53427f3f831ee33ddaee02[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mUI_Changes[m[33m, [m[1;31morigin/UI_Changes[m[33m)[m
+Author: roberttu510 <roberttu510@gmail.com>
+Date:   Wed Nov 20 16:29:16 2024 -0800
+
+    Did lots of UI changes, changed some variable names, added Comparison: The average water usage for a x-person... under AI-Powered Cost Insights
+
+[33mcommit b8b98addf0421355b5f7e26e6d54051bfcd894bb[m[33m ([m[1;32mmain[m[33m)[m
+Author: roberttu510 <roberttu510@gmail.com>
+Date:   Wed Nov 20 13:30:07 2024 -0800
+
+    Adjusted Logo Size
+
+[33mcommit 686282a6bbb2cc39719556ed4b9f67f0019824a0[m
+Author: roberttu510 <roberttu510@gmail.com>
+Date:   Wed Nov 20 12:30:26 2024 -0800
+
+    Doing more UI changes with logo, dropping insights page and having everything on the first page
+
+[33mcommit ed44e629d4fdd68890567153b6bc76aa73a5dadb[m
+Author: roberttu510 <roberttu510@gmail.com>
+Date:   Wed Nov 20 11:58:23 2024 -0800
+
+    Working on UI changes in a seperate branch right now
