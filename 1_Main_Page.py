@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import openai
 import os
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 # Load datasets (JASON)
